@@ -12,7 +12,7 @@ import lib.*;
 /*
  * Created by sasquatch on 7/7/14. brilliant, can you see this?
  */
-public class chatApp extends JPanel implements ActionListener {
+public class chatApp {
 
     protected static JTextArea textArea;
     protected JTextField textField;
@@ -21,7 +21,7 @@ public class chatApp extends JPanel implements ActionListener {
     private static List<String> conversation;
 
     public chatApp() {
-        super(new GridBagLayout());
+/*        super(new GridBagLayout());
 
         textField = new JTextField(20);
         textField.addActionListener(this);
@@ -38,10 +38,11 @@ public class chatApp extends JPanel implements ActionListener {
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        add(scrollPane, c);
+        add(scrollPane, c);*/
+
     }
 
-    public void actionPerformed(ActionEvent evt) {
+   /* public void actionPerformed(ActionEvent evt) {
         String text = textField.getText();
         chat myChat = new chat("sussmonkey_69@hotmail.com", "123456789");
         //textArea.append(text + newline);
@@ -49,9 +50,9 @@ public class chatApp extends JPanel implements ActionListener {
         textField.selectAll();
         textArea.setCaretPosition(textArea.getDocument().getLength());
 
-    }
+    }*/
 
-    private static void CreateGUI() {
+    /*private static void CreateGUI() {
         JFrame frame = new JFrame("Secret Chat");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -60,17 +61,17 @@ public class chatApp extends JPanel implements ActionListener {
         frame.pack();
         frame.setVisible(true);
 
-    }
+    }*/
 
-    public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+    //public static void main(String[] args) {
+        /*javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 CreateGUI();
             }
-        });
+        });*/
 
-        Timer timer = new Timer();
+       /* Timer timer = new Timer();
 
         chat myChat = new chat("sussmonkey_69@hotmail.com", "123456789");
         conversation = myChat.fetchConversation("Jj");
@@ -79,11 +80,11 @@ public class chatApp extends JPanel implements ActionListener {
                 textArea.append(conversation.get(i) + newline);
         }
         lastDisplayedMessageTimestamp = myChat.getLastTimeStamp();
-        timer.scheduleAtFixedRate(new updateFeed(), 2, 1 * 1000);
-    }
+        timer.scheduleAtFixedRate(new updateFeed(), 2, 1 * 1000);*/
+    //}
 
 
-    private static class updateFeed extends TimerTask {
+    /*private static class updateFeed extends TimerTask {
         chat mainChat;
 
         updateFeed() {
@@ -98,5 +99,5 @@ public class chatApp extends JPanel implements ActionListener {
             }
             lastDisplayedMessageTimestamp = mainChat.getLastTimeStamp();
         }
-    }
+    }*/
 }

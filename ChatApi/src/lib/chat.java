@@ -9,8 +9,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.net.URLEncoder;
+import java.util.Map;
 
 import org.json.*;
 import org.json.JSONArray;
@@ -67,9 +69,9 @@ public class chat {
         return sb.toString();
     }
 
-    public void sendPost(String msg){
+    public void sendPost(String msg, String convoId){
         try{
-            httpPost(messageUrl, "Jj", msg);
+            httpPost(messageUrl, convoId, msg);
         }
         catch (IOException e){
             System.out.println(e);
@@ -204,17 +206,17 @@ public class chat {
                 handles.add(jsonArray.get(i).toString());
             }
 
-            System.out.println(handles.toString());
         } catch (JSONException e) {
             System.out.println(e);
         }
         return handles;
     }
 
-    public List<JSONObject> fetchConversations(){
+    public List<String> fetchConversations(){
         String convUrl = conversationUrl;
         String jsonString = "";
         List<JSONObject> conversations = new ArrayList<JSONObject>();
+        List<String> conversationList = new ArrayList<String>();
 
         try{
             jsonString = httpGet(convUrl);
@@ -230,11 +232,14 @@ public class chat {
             for (int i = 0; i < jsonArray.length(); i++) {
                 conversations.add((JSONObject) jsonArray.get(i));
             }
+            for (int i = 0; i < conversations.size(); i++){
+                conversationList.add(i,conversations.get(i).getString("id"));
+            }
 
             System.out.println(conversations.toString());
         } catch (JSONException e) {
             System.out.println(e);
         }
-        return conversations;
+        return conversationList;
     }
 }
