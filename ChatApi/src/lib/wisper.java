@@ -1,12 +1,8 @@
 package lib;
 
-import javafx.scene.input.KeyCode;
-import org.json.JSONObject;
-
 import javax.swing.*;
 import java.awt.event.*;
 import java.util.List;
-import java.util.Map;
 import java.util.TimerTask;
 import java.util.Timer;
 
@@ -14,7 +10,6 @@ import java.util.Timer;
  * Created by MaGraham on 10/07/2014.
  */
 public class wisper {
-    private JPasswordField passwordField1;
     private JTextField usernameField;
     private JTextArea chatArea;
     private JTextField messageField;
@@ -30,11 +25,12 @@ public class wisper {
     private List<String> conversations;
     private String currentConversationId;
 
-    private static chat mainChat;
+    private static ChatController mainChatController;
     private final static String newline = "\n";
     private Timer timer;
 
     public wisper(){
+        mainChatController = new ChatController(usernameField.getText(), passwordField.getText());
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -47,8 +43,10 @@ public class wisper {
                 super.mouseClicked(e);
                 if (e.getClickCount() == 2 && !e.isConsumed()) {
                     e.consume();
-                    currentConversationId = conversationsList.getSelectedValue().toString();
-                    updateConversation(conversationsList.getSelectedValue().toString());
+                    if(currentConversationId != conversationsList.getSelectedValue().toString()) {
+                        currentConversationId = conversationsList.getSelectedValue().toString();
+                        updateConversation(currentConversationId);
+                    }
                 }
             }
         });
@@ -63,38 +61,52 @@ public class wisper {
                 }
             }
         });
+
+
     }
 
-    public void sendMessage(String message){
-        mainChat.sendPost(message, currentConversationId);
+    private void sendMessage(String message){
+        mainChatController.sendPost(message, currentConversationId);
     }
 
-    public void updateConversation(String id){
-        conversation = mainChat.fetchConversation(id);
+    private void updateConversation(String id){
+        chatArea.setText(null);
+        conversation = mainChatController.fetchConversation(id);
         chatArea.setText(null);
         for (int i = 0; i < conversation.size(); i++) {
             chatArea.append(conversation.get(i) + newline);
         }
     }
 
-    public void connectToChat(){
-        mainChat = new chat(usernameField.getText(), passwordField.getText());
-        conversation = mainChat.fetchConversation("Jj");
-        currentConversationId = "Jj";
-        handles = mainChat.fetchHandles();
-        conversations = mainChat.fetchConversations();
-        timer = new Timer();
+    private String connectToChat(){
 
-        for (int i = 0; i < conversation.size(); i++) {
-            chatArea.append(conversation.get(i) + newline);
+        try {
+            //mainChatController = new ChatController(usernameField.getText(), passwordField.getText());
+
+            conversations = mainChatController.fetchConversations();
+            conversation = mainChatController.fetchConversation(conversations.get(0));
+            currentConversationId = conversations.get(0);
+            handles = mainChatController.fetchHandles();
+
+
+            timer = new Timer();
+
+            for (int i = 0; i < conversation.size(); i++) {
+                chatArea.append(conversation.get(i) + newline);
+            }
+
+            handlesList.setListData(handles.toArray());
+
+            conversationsList.setListData(conversations.toArray());
+
+            lastDisplayedMessageTimestamp = mainChatController.getLastTimeStamp();
+            timer.scheduleAtFixedRate(new updateFeed(), 2, 1 * 1000);
         }
-
-        handlesList.setListData(handles.toArray());
-
-        conversationsList.setListData(conversations.toArray());
-
-        lastDisplayedMessageTimestamp = mainChat.getLastTimeStamp();
-        timer.scheduleAtFixedRate(new updateFeed(), 2, 1 * 1000);
+        catch (Exception e){
+            System.out.println(e);
+            return null;
+        }
+        return null;
     }
 
     public static void main(String[] args) {
@@ -112,12 +124,12 @@ public class wisper {
         }
 
         public void run() {
-            conversation = mainChat.fetchNewMessages(currentConversationId, lastDisplayedMessageTimestamp);
+            conversation = mainChatController.fetchNewMessages(currentConversationId, lastDisplayedMessageTimestamp);
 
             for (int i = 0; i < conversation.size(); i++){
                 chatArea.append(conversation.get(i) + newline);
             }
-            lastDisplayedMessageTimestamp = mainChat.getLastTimeStamp();
+            lastDisplayedMessageTimestamp = mainChatController.getLastTimeStamp();
         }
     }
 }

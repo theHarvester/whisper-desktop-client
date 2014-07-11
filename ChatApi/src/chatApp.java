@@ -44,7 +44,7 @@ public class chatApp {
 
    /* public void actionPerformed(ActionEvent evt) {
         String text = textField.getText();
-        chat myChat = new chat("sussmonkey_69@hotmail.com", "123456789");
+        ChatController myChat = new ChatController("sussmonkey_69@hotmail.com", "123456789");
         //textArea.append(text + newline);
         myChat.sendPost(text);
         textField.selectAll();
@@ -73,7 +73,7 @@ public class chatApp {
 
        /* Timer timer = new Timer();
 
-        chat myChat = new chat("sussmonkey_69@hotmail.com", "123456789");
+        ChatController myChat = new ChatController("sussmonkey_69@hotmail.com", "123456789");
         conversation = myChat.fetchConversation("Jj");
 
         for (int i = 0; i < conversation.size(); i++) {
@@ -85,10 +85,10 @@ public class chatApp {
 
 
     /*private static class updateFeed extends TimerTask {
-        chat mainChat;
+        ChatController mainChat;
 
         updateFeed() {
-            mainChat = new chat("sussmonkey_69@hotmail.com", "123456789");
+            mainChat = new ChatController("sussmonkey_69@hotmail.com", "123456789");
         }
 
         public void run() {
