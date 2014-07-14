@@ -6,9 +6,7 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.json.*;
 import org.json.JSONArray;
@@ -29,8 +27,8 @@ public class ChatController {
     HttpCookie cookie;
     CookieManager manager;
 
-    public ChatController(String username, String password){
-        manager = new CookieManager( null, CookiePolicy.ACCEPT_ALL );
+    public ChatController(String username, String password) {
+        manager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(manager);
         this.username = username;
         this.password = password;
@@ -41,7 +39,17 @@ public class ChatController {
         this.authUrl = this.baseUrl + "auth";
     }
 
-    public int getLastTimeStamp(){
+    public ChatController() {
+        manager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
+        CookieHandler.setDefault(manager);
+        this.baseUrl = "http://chat.fifty2project.com/api/";
+        this.handleUrl = this.baseUrl + "handle";
+        this.conversationUrl = this.baseUrl + "conversation";
+        this.messageUrl = this.baseUrl + "message";
+        this.authUrl = this.baseUrl + "auth";
+    }
+
+    public int getLastTimeStamp() {
         return lastTimeStamp;
     }
 
@@ -49,9 +57,9 @@ public class ChatController {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-        if(cookie==null){
+        if (cookie == null) {
             System.out.println("Cookie was null, getting session");
-            fetch(authUrl);
+            getSession(authUrl);
         }
 
         // todo: workout way of storing session so credentials aren't as easily sniffed
@@ -74,23 +82,22 @@ public class ChatController {
         return sb.toString();
     }
 
-    public void sendPost(String msg, String convoId){
-        try{
+    public void sendPost(String msg, String convoId) {
+        try {
             httpPost(messageUrl, convoId, msg);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             System.out.println(e);
         }
     }
 
-    private void httpPost(String urlStr, String convId, String message) throws IOException{
+    private void httpPost(String urlStr, String convId, String message) throws IOException {
 
         URL obj = new URL(urlStr);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-        if(cookie==null){
+        if (cookie == null) {
             System.out.println("Cookie was null, getting session");
-            fetch(authUrl);
+            getSession(authUrl);
         }
 
         // todo: workout way of storing session so credentials aren't as easily sniffed
@@ -108,11 +115,6 @@ public class ChatController {
         wr.flush();
         wr.close();
 
-        int responseCode = con.getResponseCode();
-        System.out.println("\nSending 'POST' request to URL : " + urlStr);
-        System.out.println("Post parameters : " + urlParameters);
-        System.out.println("Response Code : " + responseCode);
-
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
@@ -122,23 +124,18 @@ public class ChatController {
             response.append(inputLine);
         }
         in.close();
-
-        //print result
-        System.out.println(response.toString());
-
     }
 
-    public List<String> fetchConversation(String convId){
+    public List<String> fetchConversation(String convId) {
 
         String convUrl = conversationUrl + "/" + convId;
         String jsonString = "";
         List<String> conversation = new ArrayList<String>();
         List<JSONObject> messages = new ArrayList<JSONObject>();
 
-        try{
+        try {
             jsonString = httpGet(convUrl);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             System.out.println(e);
         }
 
@@ -150,7 +147,7 @@ public class ChatController {
                 messages.add((JSONObject) jsonArray.get(i));
             }
             //todo: use a better data type to store messages, handles and ids
-            for(int i =0; i < messages.size(); i++) {
+            for (int i = 0; i < messages.size(); i++) {
                 conversation.add(i, messages.get(i).getString("handle") + " : " + messages.get(i).getString("message"));
                 //get timestamp of current message, make it last known timestamp
                 lastTimeStamp = messages.get(i).getInt("ts");
@@ -161,16 +158,17 @@ public class ChatController {
         return conversation;
     }
 
-    public List<String> fetchNewMessages(String convId, int timestamp){
+    public List<String> fetchNewMessages(String convId, int timestamp) {
         String convUrlFromTS = conversationUrl + "/" + convId + "/from/" + timestamp;
         String jsonString = "";
         List<String> conversation = new ArrayList<String>();
         List<JSONObject> messages = new ArrayList<JSONObject>();
 
-        try{
+        try {
+
             jsonString = httpGet(convUrlFromTS);
-        }
-        catch (IOException e){
+
+        } catch (IOException e) {
             System.out.println(e);
         }
 
@@ -182,7 +180,7 @@ public class ChatController {
                 messages.add((JSONObject) jsonArray.get(i));
             }
             //todo: use a better data type to store messages, handles and ids
-            for(int i =0; i < messages.size(); i++) {
+            for (int i = 0; i < messages.size(); i++) {
                 conversation.add(i, messages.get(i).getString("handle") + " : " + messages.get(i).getString("message"));
                 //get timestamp of current message, make it last known timestamp
                 lastTimeStamp = messages.get(i).getInt("ts");
@@ -193,14 +191,13 @@ public class ChatController {
         return conversation;
     }
 
-    public List<String> fetchHandles(){
+    public List<String> fetchHandles() {
         String jsonString = "";
         List<String> handles = new ArrayList<String>();
 
-        try{
+        try {
             jsonString = httpGet(handleUrl);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             System.out.println(e);
         }
 
@@ -219,16 +216,15 @@ public class ChatController {
         return handles;
     }
 
-    public List<String> fetchConversations(){
+    public List<String> fetchConversations() {
         String convUrl = conversationUrl;
         String jsonString = "";
         List<JSONObject> conversations = new ArrayList<JSONObject>();
         List<String> conversationList = new ArrayList<String>();
 
-        try{
+        try {
             jsonString = httpGet(convUrl);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             System.out.println(e);
         }
 
@@ -239,8 +235,8 @@ public class ChatController {
             for (int i = 0; i < jsonArray.length(); i++) {
                 conversations.add((JSONObject) jsonArray.get(i));
             }
-            for (int i = 0; i < conversations.size(); i++){
-                conversationList.add(i,conversations.get(i).getString("id"));
+            for (int i = 0; i < conversations.size(); i++) {
+                conversationList.add(i, conversations.get(i).getString("id"));
             }
 
         } catch (JSONException e) {
@@ -249,51 +245,62 @@ public class ChatController {
         return conversationList;
     }
 
-    private void fetch(String urlString) {
+    private void getSession(String urlString) {
         try {
             URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            if(cookie == null) {
-                System.out.println("cookie was null");
-                String credentials = this.username + ":" + this.password;
-                String encoded = Base64.encode(credentials.getBytes());
-                conn.setRequestProperty("Authorization", "Basic " + encoded);
+            String credentials = this.username + ":" + this.password;
+            String encoded = Base64.encode(credentials.getBytes());
+            conn.setRequestProperty("Authorization", "Basic " + encoded);
 
-                InputStream in = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                int status = conn.getResponseCode();
-
-                CookieStore cookieJar = manager.getCookieStore();
-                List<HttpCookie> cookies = cookieJar.getCookies();
-                for (HttpCookie ckie : cookies) {
-                    cookie = ckie;
-                }
-            }
-            else{
-                System.out.println("there was a cookies, setting auth mode");
-                conn.setRequestProperty("Cookie", cookie.toString());
-            }
             InputStream in = conn.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            int status = conn.getResponseCode();
 
-            System.out.println("Status = " + status);
-            String key;
-            System.out.println("Headers-------start-----");
-            for (int i = 1; (key = conn.getHeaderFieldKey(i)) != null; i++) {
-                System.out.println(key + ":" + conn.getHeaderField(i));
+            CookieStore cookieJar = manager.getCookieStore();
+            List<HttpCookie> cookies = cookieJar.getCookies();
+            for (HttpCookie ckie : cookies) {
+                cookie = ckie;
             }
-            System.out.println("Headers-------end-----");
-            System.out.println("Content-------start-----");
-            String inputLine;
-            while ((inputLine = reader.readLine()) != null) {
-                System.out.println(inputLine);
-            }
-            System.out.println("Content-------end-----");
             in.close();
+            saveTokenToFile();
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+
+    private void saveTokenToFile(){
+        try {
+            PrintWriter out = new PrintWriter("token.txt");
+            out.println(cookie.getValue()); //todo: Use the token from the server rather than a cookie
+            out.close();
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+    }
+    private boolean readTokenFromFile(){
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("token.txt"));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                line = br.readLine();
+            }
+            cookie = new HttpCookie("laravel_session",sb.toString());
+            br.close();
+            return true;
+        }
+        catch(Exception e){
+            System.out.println(e);
+            return false;
+        }
+    }
+    public void startUpFunc(){
+
+        if(readTokenFromFile()) {
+            System.out.println("Token was found");
         }
     }
 }

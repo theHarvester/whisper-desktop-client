@@ -24,8 +24,10 @@ public class wisper {
     private List<String> handles;
     private List<String> conversations;
     private String currentConversationId;
+    private static boolean tokenFailed;
 
     private static ChatController mainChatController;
+    private static ApiConnection apiConnection = ApiConnection.getInstance();
     private final static String newline = "\n";
     private Timer timer;
 
@@ -81,8 +83,9 @@ public class wisper {
     private String connectToChat(){
 
         try {
-            //mainChatController = new ChatController(usernameField.getText(), passwordField.getText());
-
+            if(tokenFailed) {
+                apiConnection.getConnectionInfo(usernameField.getText(), passwordField.getText());
+            }
             conversations = mainChatController.fetchConversations();
             conversation = mainChatController.fetchConversation(conversations.get(0));
             currentConversationId = conversations.get(0);
@@ -116,6 +119,11 @@ public class wisper {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+
+        if(!apiConnection.startup())
+        {
+            tokenFailed = true;//send apiConnection our credentials
+        }
     }
 
     private class updateFeed extends TimerTask {
