@@ -7,6 +7,11 @@ import java.util.ArrayList;
  */
 public class User {
     private ArrayList<Handle> Handles;
+    private ApiConnection apiConnection = ApiConnection.getInstance();
+
+    public User(){
+
+    }
 
     public ArrayList<Handle> getHandleList(){
         return this.Handles;
@@ -22,5 +27,9 @@ public class User {
 
     public void removeHandle(){
         // todo: remove from Handle list, don't know what to pass into this function to know what to delete
+    }
+
+    private void loadHandles(){
+
     }
 }

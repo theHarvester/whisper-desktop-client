@@ -2,10 +2,7 @@ package lib;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
 import java.util.List;
 
@@ -17,12 +14,9 @@ public class ApiConnection {
     private String username;
     private String password;
     private String baseUrl;
-    private String handleUrl;
-    private String conversationUrl;
-    private String messageUrl;
     private String authUrl;
-    HttpCookie cookie;
-    CookieManager manager;
+    private HttpCookie cookie;
+    private CookieManager manager;
 
     public final static ApiConnection INSTANCE = new ApiConnection();
 
@@ -31,9 +25,6 @@ public class ApiConnection {
         manager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(manager);
         this.baseUrl = "http://chat.fifty2project.com/api/";
-        this.handleUrl = this.baseUrl + "handle";
-        this.conversationUrl = this.baseUrl + "conversation";
-        this.messageUrl = this.baseUrl + "message";
         this.authUrl = this.baseUrl + "auth";
     }
 
@@ -46,6 +37,32 @@ public class ApiConnection {
         this.password = password;
         getSession();
     }
+
+    protected String httpGet(String urlStr) throws IOException {
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        // todo: workout way of storing session so credentials aren't as easily sniffed
+        conn.setRequestProperty("Cookie", cookie.toString());
+
+        if (conn.getResponseCode() != 200) {
+            throw new IOException(conn.getResponseMessage());
+        }
+
+        // Buffer the result into a string
+        BufferedReader rd = new BufferedReader(
+                new InputStreamReader(conn.getInputStream()));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = rd.readLine()) != null) {
+            sb.append(line);
+        }
+        rd.close();
+        conn.disconnect();
+        return sb.toString();
+    }
+
+    //todo:HTTP POST
 
     public boolean startup(){
         if(!readTokenFromFile()) { //check if file exists, if not get credentials from user/gui

@@ -105,7 +105,7 @@ public class ChatController {
         System.out.println("Has Session and is POSTing");
         con.setRequestMethod("POST");
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
+        //todo: work out a better way to encode and send the message data
         String urlParameters = "conversation_id=" + convId + "&message=" + URLEncoder.encode(message, "UTF-8");
 
         // Send post request

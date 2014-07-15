@@ -20,19 +20,15 @@ public class wisper {
     private JList handlesList;
     private JList conversationsList;
     private int lastDisplayedMessageTimestamp;
-    private List<String> conversation;
-    private List<String> handles;
-    private List<String> conversations;
+    private Handle handle; //in future this will come from the user class
     private String currentConversationId;
     private static boolean tokenFailed;
 
-    private static ChatController mainChatController;
     private static ApiConnection apiConnection = ApiConnection.getInstance();
     private final static String newline = "\n";
     private Timer timer;
 
     public wisper(){
-        mainChatController = new ChatController(usernameField.getText(), passwordField.getText());
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -45,10 +41,7 @@ public class wisper {
                 super.mouseClicked(e);
                 if (e.getClickCount() == 2 && !e.isConsumed()) {
                     e.consume();
-                    if(currentConversationId != conversationsList.getSelectedValue().toString()) {
-                        currentConversationId = conversationsList.getSelectedValue().toString();
-                        updateConversation(currentConversationId);
-                    }
+                    //load the conversation that has just been clicked
                 }
             }
         });
@@ -57,27 +50,10 @@ public class wisper {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 if(e.getKeyCode()== KeyEvent.VK_ENTER){
-                    String msg = messageField.getText();
-                    messageField.setText(null);
-                    sendMessage(msg);
+                    //send the message that has been entered
                 }
             }
         });
-
-
-    }
-
-    private void sendMessage(String message){
-        mainChatController.sendPost(message, currentConversationId);
-    }
-
-    private void updateConversation(String id){
-        chatArea.setText(null);
-        conversation = mainChatController.fetchConversation(id);
-        chatArea.setText(null);
-        for (int i = 0; i < conversation.size(); i++) {
-            chatArea.append(conversation.get(i) + newline);
-        }
     }
 
     private String connectToChat(){
@@ -86,24 +62,15 @@ public class wisper {
             if(tokenFailed) {
                 apiConnection.getConnectionInfo(usernameField.getText(), passwordField.getText());
             }
-            conversations = mainChatController.fetchConversations();
-            conversation = mainChatController.fetchConversation(conversations.get(0));
-            currentConversationId = conversations.get(0);
-            handles = mainChatController.fetchHandles();
-
-
+            else{
+                loadChatGUIInformation();
+            }
             timer = new Timer();
 
-            for (int i = 0; i < conversation.size(); i++) {
-                chatArea.append(conversation.get(i) + newline);
-            }
 
-            handlesList.setListData(handles.toArray());
 
-            conversationsList.setListData(conversations.toArray());
-
-            lastDisplayedMessageTimestamp = mainChatController.getLastTimeStamp();
-            timer.scheduleAtFixedRate(new updateFeed(), 2, 1 * 1000);
+            //lastDisplayedMessageTimestamp = mainChatController.getLastTimeStamp();
+            //timer.scheduleAtFixedRate(new updateFeed(), 2, 1 * 1000);
         }
         catch (Exception e){
             System.out.println(e);
@@ -124,6 +91,18 @@ public class wisper {
         {
             tokenFailed = true;//send apiConnection our credentials
         }
+
+    }
+
+    private void loadChatGUIInformation(){
+        handle = new Handle(); //builds all the data from handle downwards
+
+        conversationsList.setListData(handle.getConversations().toArray());
+
+        for(int i = 0; i < handle.getConversations().get(2).getConversation().size(); i++){
+            chatArea.append(handle.getConversations().get(2).getConversation().get(i).getHandle() + " : " + handle.getConversations().get(2).getConversation().get(i).getMessage() + newline);
+        }
+
     }
 
     private class updateFeed extends TimerTask {
@@ -132,12 +111,7 @@ public class wisper {
         }
 
         public void run() {
-            conversation = mainChatController.fetchNewMessages(currentConversationId, lastDisplayedMessageTimestamp);
 
-            for (int i = 0; i < conversation.size(); i++){
-                chatArea.append(conversation.get(i) + newline);
-            }
-            lastDisplayedMessageTimestamp = mainChatController.getLastTimeStamp();
         }
     }
 }
