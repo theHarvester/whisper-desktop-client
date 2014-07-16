@@ -5,20 +5,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
+/*
  * Created by JAMES on 11/07/2014.
  */
 public class Handle {
     private String name;
-    private List<Conversation> conversations = new ArrayList<Conversation>();
+    private Map<String, Conversation> conversationsMap = new HashMap<String, Conversation>();
+    private List<String> handles = new ArrayList<String>();
     private ApiConnection apiConnection = ApiConnection.getInstance();
-    private String jsonString;
-    private String conversationsURL = "http://chat.fifty2project.com/api/conversations";
+
+    private String conversationsURL = apiConnection.baseUrl + "conversations";
+    private String handlesURL = apiConnection.baseUrl + "handle";
 
     public Handle(){
         loadConversations();
+        loadHandles();
     }
 
     public String getName() {
@@ -29,39 +34,43 @@ public class Handle {
         this.name = name;
     }
 
-    public List<Conversation> getConversations(){
-        return  conversations;
+    public Map getConversationsMap(){
+        return conversationsMap;
     }
 
-    //todo: Find a better way to look for conversation pertaining to a specific handle
+    public List<String> getHandles(){
+        return handles;
+    }
 
+    //todo: For now this will decode the conversations list initialise conversations(ArrayList) with all the conversations tied to this token
     private void loadConversations(){
-        try{
-            jsonString = apiConnection.httpGet(conversationsURL);
-            decodeJsonString();
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
-
-    }
-
-    //todo: For now this will decode the conversations list initialse conversations(ArrayList) with all the conversations tied to this token
-    private void decodeJsonString(){
         try {
+            String jsonString = apiConnection.httpGet(conversationsURL);
             JSONObject jsonObject = new JSONObject(jsonString);
             JSONArray jsonArray = jsonObject.getJSONArray("conversations");
 
             for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject tempObject = jsonArray.getJSONObject(i);
-                //JSONArray tempJsonArray = jsonObject.getJSONArray("handles");
-                //name = tempJsonArray.getString(0);
+                JSONObject tempObject = jsonArray.getJSONObject(i);;
                 Conversation tempConversation = new Conversation(tempObject.getString("id"));
-                conversations.add(i, tempConversation);
+                conversationsMap.put(tempObject.getString("id"), tempConversation);
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             System.out.println(e);
         }
-
     }
+
+    private void loadHandles(){
+        try {
+            String jsonString = apiConnection.httpGet(handlesURL);
+            JSONObject jsonObject = new JSONObject(jsonString);
+            JSONArray jsonArray = jsonObject.getJSONArray("handles");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                handles.add(i,jsonArray.get(i).toString());
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
 }

@@ -2,7 +2,7 @@ package lib;
 
 import org.json.JSONObject;
 
-/**
+/*
  * Created by JAMES on 11/07/2014.
  */
 public class Message{
@@ -11,9 +11,9 @@ public class Message{
     private int timeStamp;
 
     public Message(String h, String m, int ts){
-        handle = h;
-        message = m;
-        timeStamp = ts;
+        this.handle = h;
+        this.message = m;
+        this.timeStamp = ts;
     }
 
     public Message(){
